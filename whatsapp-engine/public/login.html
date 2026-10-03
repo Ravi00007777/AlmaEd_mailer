@@ -17,16 +17,21 @@
   input:focus { outline: 2px solid var(--mag); outline-offset: 1px; }
   button { font-size: 16px; font-weight: 700; padding: 12px; border-radius: 12px; border: 0; cursor: pointer; color: #fff; background: var(--mag); }
   .err { color: var(--bad); font-size: 14px; margin: 0; }
+  details { font-size: 14px; color: var(--muted); } summary { cursor: pointer; color: var(--mag); font-weight: 600; } details p { margin: 8px 0 0; }
 </style>
 </head>
 <body>
 <form method="post" action="/login">
   <header><h1>AlmaED <span>WhatsApp</span></h1></header>
   <div class="body">
-    <p class="err" id="err" hidden role="alert">Wrong email or password.</p>
-    <label>Email <input type="email" name="email" autocomplete="username" required autofocus></label>
+    <p class="err" id="err" hidden role="alert">Wrong user ID or password.</p>
+    <label>User ID <input type="text" name="user" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus></label>
     <label>Password <input type="password" name="password" autocomplete="current-password" required></label>
     <button type="submit">Sign in</button>
+    <details>
+      <summary>Forgot password?</summary>
+      <p>The password is set in Vercel. Open your project → <b>Settings → Environment Variables</b>, edit <code>DASHBOARD_PASSWORD</code>, then <b>Deployments → ⋯ → Redeploy</b>. Sign in with the new password.</p>
+    </details>
   </div>
 </form>
 <script>if (location.search.includes('error')) document.getElementById('err').hidden = false;</script>

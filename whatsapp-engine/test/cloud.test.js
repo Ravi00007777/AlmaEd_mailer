@@ -44,10 +44,10 @@ function call(method, path, { auth, cookie, body } = {}) {
   assert.equal((await call('GET', '/api/state')).code, 401, 'dashboard needs a login');
   assert.equal((await call('GET', '/')).headers.Location, '/login', 'page redirects to login');
   assert.match((await call('GET', '/login')).body, /<form method="post"/);
-  const bad = await call('POST', '/login', { body: { email: 'me@x.com', password: 'no' } });
+  const bad = await call('POST', '/login', { body: { user: 'me@x.com', password: 'no' } });
   assert.equal(bad.headers.Location, '/login?error=1', 'wrong password refused');
   assert.equal(bad.headers['Set-Cookie'], undefined);
-  const good = await call('POST', '/login', { body: { email: ' ME@x.com ', password: 'pw' } });
+  const good = await call('POST', '/login', { body: { user: ' ME@x.com ', password: 'pw' } });
   assert.equal(good.headers.Location, '/', good.body);
   const session = good.headers['Set-Cookie'].split(';')[0];
   assert.equal((await call('GET', '/api/state', { cookie: session.slice(0, -1) + (session.endsWith('0') ? '1' : '0') })).code, 401, 'tampered cookie refused');

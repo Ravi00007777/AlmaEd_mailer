@@ -207,7 +207,7 @@ module.exports = async (req, res) => {
       if (req.method === 'POST') {
         const b = req.body || {};
         if (!env.DASHBOARD_EMAIL || !env.DASHBOARD_PASSWORD
-          || !safeEq(String(b.email || '').trim().toLowerCase(), env.DASHBOARD_EMAIL.toLowerCase())
+          || !safeEq(String(b.user || '').trim().toLowerCase(), env.DASHBOARD_EMAIL.toLowerCase())
           || !safeEq(b.password || '', env.DASHBOARD_PASSWORD)) return redirect(res, '/login?error=1');
         const exp = Date.now() + SESSION_DAYS * 864e5;
         res.setHeader('Set-Cookie', `s=${exp}.${sign(exp)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`);
