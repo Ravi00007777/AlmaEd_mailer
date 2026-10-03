@@ -181,6 +181,15 @@ function send(res, code, body, type = 'application/json') {
   res.setHeader('Cache-Control', 'no-store');
   res.end(type === 'application/json' ? JSON.stringify(body) : body);
 }
+function redirect(res, to) { res.statusCode = 303; res.setHeader('Location', to); res.end(); }
+
+// session cookie "s=<expiry>.<hmac>"; keyed on email+password, so changing either signs everyone out
+const SESSION_DAYS = 30;
+const sign = (exp) => crypto.createHmac('sha256', `${env.DASHBOARD_EMAIL}\n${env.DASHBOARD_PASSWORD}`).update(String(exp)).digest('hex');
+function signedIn(req) {
+  const m = /(?:^|;\s*)s=(\d+)\.([0-9a-f]+)/.exec(req.headers.cookie || '');
+  return !!(m && env.DASHBOARD_EMAIL && env.DASHBOARD_PASSWORD && Number(m[1]) > Date.now() && safeEq(m[2], sign(m[1])));
+}
 function kick() { if (!inSession) waitUntil(session().catch(console.error)); }
 
 module.exports = async (req, res) => {
@@ -192,12 +201,25 @@ module.exports = async (req, res) => {
       return send(res, 202, { ok: true });
     }
 
-    // everything else is the dashboard: contacts' numbers and a live WhatsApp sender, so it needs the password
-    const pass = Buffer.from(String(req.headers.authorization || '').replace(/^Basic /, ''), 'base64').toString().split(':').slice(1).join(':');
-    if (!env.DASHBOARD_PASSWORD || !safeEq(pass, env.DASHBOARD_PASSWORD)) {
-      res.setHeader('WWW-Authenticate', 'Basic realm="AlmaED"');
-      return send(res, 401, { error: 'password required' });
+    // everything else is the dashboard: contacts' numbers and a live WhatsApp sender, so it needs a login
+    // ponytail: no rate limit on /login; rely on a strong password, add one if the URL gets hammered
+    if (url.pathname === '/login') {
+      if (req.method === 'POST') {
+        const b = req.body || {};
+        if (!env.DASHBOARD_EMAIL || !env.DASHBOARD_PASSWORD
+          || !safeEq(String(b.email || '').trim().toLowerCase(), env.DASHBOARD_EMAIL.toLowerCase())
+          || !safeEq(b.password || '', env.DASHBOARD_PASSWORD)) return redirect(res, '/login?error=1');
+        const exp = Date.now() + SESSION_DAYS * 864e5;
+        res.setHeader('Set-Cookie', `s=${exp}.${sign(exp)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`);
+        return redirect(res, '/');
+      }
+      return send(res, 200, fs.readFileSync(path.join(__dirname, '..', 'public', 'login.html'), 'utf8'), 'text/html; charset=utf-8');
     }
+    if (url.pathname === '/logout') {
+      res.setHeader('Set-Cookie', 's=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0');
+      return redirect(res, '/login');
+    }
+    if (!signedIn(req)) return url.pathname === '/' ? redirect(res, '/login') : send(res, 401, { error: 'sign in required' });
 
     if (req.method === 'GET' && url.pathname === '/') {
       return send(res, 200, fs.readFileSync(path.join(__dirname, '..', 'public', 'dashboard.html'), 'utf8'), 'text/html; charset=utf-8');

@@ -147,6 +147,7 @@ function toast(t, ms = 3500) { const el = $('toast'); el.textContent = t; el.sty
 async function act(type, body = {}) {
   try {
     const r = await fetch('/api/action/' + type, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (r.status === 401) location.href = '/login';
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'Something went wrong');
     return d;
@@ -243,7 +244,7 @@ function render(s) {
 }
 
 async function refresh() {
-  try { const r = await fetch('/api/state'); render(await r.json()); }
+  try { const r = await fetch('/api/state'); if (r.status === 401) return void (location.href = '/login'); render(await r.json()); }
   catch (e) { $('waiting').textContent = 'Engine not reachable. Is the engine window still open?'; }
 }
 

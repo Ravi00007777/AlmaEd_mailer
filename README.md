@@ -72,7 +72,7 @@ The same engine and dashboard can run without a laptop. Vercel can't keep gowa r
    | --- | --- |
    | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API |
    | `GOWA_DB_URI` | Supabase → Connect → **Session pooler** URI, with the user changed to `gowa.<project-ref>` and the password from step 1, plus `?sslmode=require` |
-   | `DASHBOARD_PASSWORD` | the dashboard password (any username works) |
+   | `DASHBOARD_EMAIL`, `DASHBOARD_PASSWORD` | the login for the dashboard's sign-in page |
    | `CRON_SECRET` | a random string, e.g. `openssl rand -hex 24` |
    | `TEST_NUMBER` | your own number, for *Send test to my number* |
 
