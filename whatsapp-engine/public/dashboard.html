@@ -162,7 +162,7 @@ function render(s) {
   const g = s.gowa;
   $('wadot').className = 'dot ' + (g.loggedIn ? 'on' : 'off');
   $('watext').textContent = g.loggedIn ? 'WhatsApp connected · ' + fmtPhone(g.number) : (g.reachable ? 'WhatsApp not linked' : (g.proc && g.proc.state === 'starting' ? 'Starting gowa…' : 'gowa not running'));
-  $('gowaLink').href = g.url;
+  $('gowaLink').href = g.url; $('gowaLink').style.display = s.cloud ? 'none' : '';
 
   const alert = $('setupAlert');
   if (!g.reachable) {
@@ -267,13 +267,26 @@ $('pairBtn').onclick = async () => {
   finally { $('pairBtn').disabled = false; }
 };
 $('toggle').onclick = async () => { await act(S && S.running ? 'pause' : 'start'); };
+// On Vercel there is no engine folder, so the .xlsx is uploaded from here
+function pickXlsx() {
+  return new Promise((resolve) => {
+    const i = document.createElement('input'); i.type = 'file'; i.accept = '.xlsx';
+    i.onchange = () => {
+      const f = i.files[0]; if (!f) return;
+      const r = new FileReader(); r.onload = () => resolve({ name: f.name, file: String(r.result).split(',')[1] }); r.readAsDataURL(f);
+    };
+    i.click();
+  });
+}
 function bindAct(b) {
   b.onclick = async () => {
+    const body = b.dataset.act === 'import' && S && S.cloud ? await pickXlsx() : {};
     b.disabled = true;
     if (b.dataset.act === 'restartgowa') toast('Restarting gowa… this can take up to a minute.', 8000);
     try {
-      const d = await act(b.dataset.act);
-      if (b.dataset.act === 'import') toast(`Imported ${d.added} new contacts.`);
+      const d = await act(b.dataset.act, body);
+      if (d.queued) toast('Queued. It runs within a couple of minutes.', 6000);
+      else if (b.dataset.act === 'import') toast(`Imported ${d.added} new contacts.`);
       if (b.dataset.act === 'test') toast('Test sent. Check WhatsApp on your own number.');
       if (b.dataset.act === 'restartgowa') toast(d.state === 'running' || d.state === 'external' ? 'gowa is running.' : 'gowa did not come up. See the message at the top.', 6000);
     } catch (_) {} finally { b.disabled = false; }

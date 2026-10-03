@@ -5,10 +5,14 @@
   "description": "Paced WhatsApp outreach for AlmaED via gowa, with reply handling and a local dashboard.",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "fetch-gowa": "curl -fsSL https://github.com/aldinokemal/go-whatsapp-web-multidevice/releases/download/v9.5.0/whatsapp_9.5.0_linux_amd64.zip -o /tmp/gowa.zip && (unzip -o -q /tmp/gowa.zip linux-amd64 -d gowa || python3 -m zipfile -e /tmp/gowa.zip gowa)"
   },
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
+    "@vercel/functions": "^3.9.11",
     "exceljs": "^4.4.0"
   }
 }

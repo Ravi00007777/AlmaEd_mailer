@@ -10,3 +10,9 @@ whatsapp-engine/gowa/*
 node_modules/
 .DS_Store
 Thumbs.db
+
+# Secrets
+.env
+.env.*
+!.env.example
+.vercel

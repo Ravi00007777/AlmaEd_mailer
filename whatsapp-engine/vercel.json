@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run fetch-gowa",
+  "outputDirectory": "public",
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 300,
+      "memory": 1024,
+      "includeFiles": "{gowa/linux-amd64,public/dashboard.html,config.json,messages.json}"
+    }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+}

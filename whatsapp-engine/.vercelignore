@@ -1,0 +1,10 @@
+# Personal data and local runtime files never get uploaded
+data/
+logs/
+*.xlsx
+*.csv
+gowa/*
+!gowa/README.md
+node_modules/
+.env
+.env.*

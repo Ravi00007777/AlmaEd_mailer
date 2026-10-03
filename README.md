@@ -58,3 +58,26 @@ Plain-language instructions and troubleshooting are in [`whatsapp-engine/SETUP G
 ### Safety
 
 Use a **spare WhatsApp number**, not the one your students and parents use. Keep `dailyLimit` at 80 or below. gowa is an unofficial WhatsApp client, so numbers that send many cold messages can be banned.
+
+### Cloud (experimental): Vercel + Supabase
+
+The same engine and dashboard can run without a laptop. Vercel can't keep gowa running between requests, so every 2 minutes Supabase's `pg_cron` calls `/api/tick`. Each call starts gowa for up to about 4 minutes, sends what is due and collects replies, then shuts gowa down. The WhatsApp login is stored in Supabase Postgres, and engine state is stored in one Supabase row.
+
+**Trade-offs:** replies are picked up in batches, within about 2 minutes while sending and every 15 minutes when idle. Reconnecting often can raise the ban risk. Vercel's free Hobby plan is for non-commercial use only, so check its terms and keep an eye on the *Usage* tab.
+
+1. **Supabase:** create a project, then in *SQL Editor* run parts 1 and 2 of [`whatsapp-engine/supabase.sql`](whatsapp-engine/supabase.sql), with your own gowa password filled in.
+2. **Vercel:** `npm i -g vercel`, then `cd whatsapp-engine && vercel`, and add these environment variables (Project → Settings → Environment Variables):
+
+   | Variable | Value |
+   | --- | --- |
+   | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API |
+   | `GOWA_DB_URI` | Supabase → Connect → **Session pooler** URI, with the user changed to `gowa.<project-ref>` and the password from step 1, plus `?sslmode=require` |
+   | `DASHBOARD_PASSWORD` | the dashboard password (any username works) |
+   | `CRON_SECRET` | a random string, e.g. `openssl rand -hex 24` |
+   | `TEST_NUMBER` | your own number, for *Send test to my number* |
+
+   Then run `vercel --prod`. The build downloads gowa's Linux binary.
+3. **Supabase again:** run part 3 of `supabase.sql`, with your Vercel URL and `CRON_SECRET` filled in.
+4. Open the Vercel URL, link WhatsApp (use the QR code or the pairing code), and upload the `.xlsx` with **Import**.
+
+`node whatsapp-engine/test/cloud.test.js` checks the auth, lock and action-queue paths against a fake Supabase.

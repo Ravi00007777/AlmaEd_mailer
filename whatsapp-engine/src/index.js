@@ -12,7 +12,7 @@ const { Gowa, GowaProcess } = require('./gowa');
 const ROOT = process.env.ENGINE_ROOT || path.join(__dirname, '..');
 const CONFIG_FILE = path.join(ROOT, 'config.json');
 const MESSAGES_FILE = path.join(ROOT, 'messages.json');
-const STATE_FILE = path.join(ROOT, 'data', 'state.json');
+const STATE_FILE = process.env.ENGINE_STATE_FILE || path.join(ROOT, 'data', 'state.json');
 
 // ---------------------------------------------------------------- config & state
 function readJson(file, fallback) {
@@ -33,7 +33,7 @@ if (!cfg.gowa.webhookSecret) { cfg.gowa.webhookSecret = crypto.randomBytes(18).t
 // Older versions used localhost:3000, which clashes with web dev servers and can resolve to IPv6 on Windows.
 if (!cfg.gowa.url || /\/\/localhost:3000\/?$/.test(cfg.gowa.url)) { cfg.gowa.url = 'http://127.0.0.1:3737'; changedCfg = true; }
 if (cfg.gowa.whatsappProxy === undefined) { cfg.gowa.whatsappProxy = ''; changedCfg = true; }
-if (changedCfg) writeJson(CONFIG_FILE, cfg);
+if (changedCfg && !process.env.VERCEL) writeJson(CONFIG_FILE, cfg);   // Vercel's disk is read-only; secrets then live per instance
 const TICK_MS = Number(process.env.ENGINE_TICK_MS || 5000);
 
 function messages() { return readJson(MESSAGES_FILE, {}); }
@@ -291,8 +291,7 @@ function findWorkbook() {
   return xs.length ? path.join(ROOT, xs[0].f) : null;
 }
 
-async function runImport() {
-  const file = findWorkbook();
+async function runImport(file = findWorkbook()) {
   if (!file) throw new Error('No .xlsx file found. Download your alumni Sheet (File → Download → Microsoft Excel) into the engine folder.');
   const { contacts, stats } = await importWorkbook(file, { skipIfAlreadyEmailed: !!cfg.skipIfAlreadyEmailed });
   let added = 0;
@@ -495,4 +494,7 @@ process.on('SIGTERM', shutdown);
 
 if (require.main === module) main().catch((e) => { console.error('\n' + e.message); process.exit(1); });
 
-module.exports = { handleWebhook, tick, action, runImport, publicState, state, cfg, main, server };
+module.exports = {
+  handleWebhook, tick, action, runImport, publicState, state, cfg, main, server, reindex, refreshGowa,
+  gowa, inHours, sentToday, todaysLimit, exportCsv, qr: () => qr, getGowaStatus: () => gowaStatus, setGowaStatus: (s) => { gowaStatus = s; },
+};
