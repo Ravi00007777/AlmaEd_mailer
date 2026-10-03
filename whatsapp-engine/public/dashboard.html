@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlmaED WhatsApp Outreach</title>
+<style>
+  :root {
+    --plum: #561132; --mag: #A3285A; --gold: #F7C766; --ink: #1E0A14;
+    --bg: #FAF6F3; --card: #FFFFFF; --line: #EADFE3; --muted: #7A6670;
+    --good: #1F8A55; --warn: #B7791F; --bad: #C0392B; --wa: #DCF8C6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+  header { background: linear-gradient(120deg, var(--plum), var(--mag)); color: #fff; padding: 18px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 20px; margin: 0; font-weight: 700; letter-spacing: -.2px; }
+  header h1 span { color: var(--gold); }
+  .pill { margin-left: auto; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,.15); display: flex; align-items: center; gap: 8px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #aaa; }
+  .dot.on { background: #4ADE80; } .dot.off { background: #F87171; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { main { grid-template-columns: 1.35fr 1fr; } .full { grid-column: 1 / -1; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .card h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 12px; }
+  .control { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  .big { font-size: 16px; font-weight: 700; padding: 12px 26px; border-radius: 12px; border: 0; cursor: pointer; color: #fff; background: var(--mag); }
+  .big.pause { background: var(--ink); }
+  .big:disabled { opacity: .5; cursor: default; }
+  .waiting { font-weight: 600; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .bar { height: 10px; border-radius: 6px; background: #F1E6EA; overflow: hidden; margin: 8px 0 4px; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, var(--mag), var(--gold)); width: 0; transition: width .4s; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 10px; }
+  .stat { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .stat b { display: block; font-size: 22px; line-height: 1.2; }
+  .stat span { font-size: 12px; color: var(--muted); }
+  .stat.hl { border-color: var(--mag); background: #FDF2F6; }
+  .btn { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--ink); text-decoration: none; display: inline-block; }
+  .btn:hover { border-color: var(--mag); }
+  .btn.primary { background: var(--mag); border-color: var(--mag); color: #fff; }
+  .btn.ghost { color: var(--muted); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .reply { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 12px; }
+  .reply h3 { margin: 0; font-size: 15px; }
+  .reply .meta { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .thread { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 10px; max-height: 260px; overflow: auto; }
+  .msg { max-width: 85%; padding: 7px 10px; border-radius: 10px; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; }
+  .msg.us { align-self: flex-end; background: var(--wa); }
+  .msg.them { align-self: flex-start; background: #F1EEF0; }
+  textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font: inherit; resize: vertical; min-height: 42px; }
+  .empty { color: var(--muted); font-size: 14px; padding: 8px 0; }
+  .feed { list-style: none; margin: 0; padding: 0; max-height: 520px; overflow: auto; }
+  .feed li { padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 13px; display: flex; gap: 10px; }
+  .feed time { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .feed .error { color: var(--bad); } .feed .good { color: var(--good); } .feed .reply { color: var(--mag); font-weight: 600; } .feed .muted { color: var(--muted); }
+  .alert { border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+  .alert.bad { background: #FDECEA; color: #7A1D14; border: 1px solid #F5C2BC; }
+  .alert.warn { background: #FFF6E0; color: #6B4A0B; border: 1px solid #F3DDA3; }
+  code { background: #F4EEF1; padding: 1px 5px; border-radius: 5px; font-size: 12.5px; }
+  .link-grid { display: grid; gap: 18px; grid-template-columns: 1fr; align-items: start; }
+  @media (min-width: 700px) { .link-grid { grid-template-columns: 1.3fr 1fr; } }
+  .steps { margin: 0 0 14px; padding-left: 20px; } .steps li { margin-bottom: 4px; }
+  .qrbox { border: 1px dashed var(--line); border-radius: 14px; min-height: 260px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; padding: 10px; }
+  .qrbox img { width: 100%; max-width: 280px; image-rendering: pixelated; }
+  .paircode { font-size: 28px; font-weight: 800; letter-spacing: 4px; color: var(--plum); margin-top: 10px; }
+  #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; display: none; max-width: 90vw; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Alma<span>ED</span> · WhatsApp outreach</h1>
+  <div class="pill"><span class="dot" id="wadot"></span><span id="watext">Checking WhatsApp…</span></div>
+</header>
+
+<main>
+  <section class="card full" id="setupAlert" style="display:none"></section>
+
+  <section class="card full" id="linkPanel" style="display:none">
+    <h2>Link your outreach WhatsApp</h2>
+    <div class="link-grid">
+      <div>
+        <ol class="steps">
+          <li>Click <b>Show QR code</b>.</li>
+          <li>On the outreach phone, open WhatsApp → <b>Settings</b> (or ⋮) → <b>Linked devices</b> → <b>Link a device</b>.</li>
+          <li>Point the phone at the QR code. The dot at the top turns green when it's linked.</li>
+        </ol>
+        <div class="row"><button class="btn primary" id="qrBtn">Show QR code</button><span class="sub" id="qrInfo"></span></div>
+        <p class="sub" style="margin:14px 0 6px">Can't scan? Use a code instead (Linked devices → Link a device → <i>Link with phone number instead</i>):</p>
+        <div class="row"><input id="pairPhone" placeholder="Outreach number, e.g. 98765 43210" style="flex:1;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit">
+          <button class="btn" id="pairBtn">Get code</button></div>
+        <div id="pairCode" class="paircode"></div>
+      </div>
+      <div class="qrbox"><img id="qrImg" alt="" style="display:none"><span id="qrPlaceholder">QR code appears here</span></div>
+    </div>
+  </section>
+
+  <section class="card full">
+    <div class="control">
+      <button class="big" id="toggle">Start sending</button>
+      <div style="flex:1;min-width:240px">
+        <div class="waiting" id="waiting">–</div>
+        <div class="bar"><div id="todaybar"></div></div>
+        <div class="sub" id="todaytext">–</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card full">
+    <h2>Progress</h2>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="card">
+    <h2>Needs your reply</h2>
+    <div id="needs"><div class="empty">No replies waiting. Positive replies get the details and demo link automatically.</div></div>
+  </section>
+
+  <section class="card">
+    <h2>Activity</h2>
+    <ul class="feed" id="feed"></ul>
+  </section>
+
+  <section class="card full">
+    <h2>Tools</h2>
+    <div class="row">
+      <button class="btn" data-act="test">Send test to my number</button>
+      <button class="btn" data-act="import">Import / re-import contacts</button>
+      <button class="btn" data-act="restartgowa">Restart gowa</button>
+      <a class="btn" href="/api/export.csv">Download status (CSV)</a>
+      <a class="btn ghost" id="gowaLink" target="_blank" rel="noopener">Open gowa's own page</a>
+    </div>
+    <p class="sub" id="importInfo" style="margin:10px 0 0"></p>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const fmtPhone = (p) => String(p || '').replace(/^91(\d{5})(\d{5})$/, '+91 $1 $2');
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const drafts = {};
+let lastNeedsKey = '';
+let S = null;
+
+function toast(t, ms = 3500) { const el = $('toast'); el.textContent = t; el.style.display = 'block'; clearTimeout(el._t); el._t = setTimeout(() => el.style.display = 'none', ms); }
+
+async function act(type, body = {}) {
+  try {
+    const r = await fetch('/api/action/' + type, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Something went wrong');
+    return d;
+  } catch (e) { toast(e.message, 6000); throw e; }
+  finally { refresh(); }
+}
+
+function fmtTime(t) { const d = new Date(t); const today = new Date().toDateString() === d.toDateString(); return today ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString([], { day: 'numeric', month: 'short' }) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+
+function render(s) {
+  S = s;
+  // WhatsApp connection
+  const g = s.gowa;
+  $('wadot').className = 'dot ' + (g.loggedIn ? 'on' : 'off');
+  $('watext').textContent = g.loggedIn ? 'WhatsApp connected · ' + fmtPhone(g.number) : (g.reachable ? 'WhatsApp not linked' : (g.proc && g.proc.state === 'starting' ? 'Starting gowa…' : 'gowa not running'));
+  $('gowaLink').href = g.url;
+
+  const alert = $('setupAlert');
+  if (!g.reachable) {
+    const pr = g.proc || {}; const win = g.platform === 'win32';
+    const restart = ' <button class="btn" data-act="restartgowa" style="margin-left:6px">Restart gowa</button>';
+    const key = pr.state + '|' + pr.reason;
+    if (alert.dataset.key !== key) {
+      alert.dataset.key = key;
+      alert.style.display = '';
+      if (pr.state === 'starting') {
+        alert.className = 'card full alert warn';
+        alert.innerHTML = '<b>Starting gowa, the WhatsApp connector…</b> The first start can take up to a minute' + (win ? ' while Windows Security checks it' : '') + '. The QR code section appears here when it\'s ready.';
+      } else if (pr.state === 'missing' || pr.state === 'blocked') {
+        alert.className = 'card full alert bad';
+        alert.innerHTML = '<b>gowa could not start.</b> ' + esc(pr.reason) + (win
+          ? '<br><br><b>Fix:</b> open <b>Windows Security</b> → <b>Virus &amp; threat protection</b> → <b>Protection history</b>. Find the item for <code>windows-amd64.exe</code>, click it → <b>Actions</b> → <b>Restore</b> (or <b>Allow on device</b>). If it isn\'t listed, unzip the package again and copy <code>gowa\\windows-amd64.exe</code> back into the <code>gowa</code> folder. Then click' + restart
+          : '<br><br><b>Fix:</b> open <b>System Settings</b> → <b>Privacy &amp; Security</b>, scroll down and click <b>Allow Anyway</b> for gowa. Then click' + restart);
+      } else if (pr.state === 'exited') {
+        alert.className = 'card full alert bad';
+        alert.innerHTML = '<b>gowa started but stopped.</b>' + restart + (pr.tail ? '<pre style="white-space:pre-wrap;font-size:12px;margin:10px 0 0;background:#fff;padding:8px;border-radius:8px">' + esc(pr.tail) + '</pre><span class="sub">Send a screenshot of this box if Restart doesn\'t fix it.</span>' : '');
+      } else {
+        alert.className = 'card full alert bad';
+        alert.innerHTML = '<b>gowa is not running.</b>' + restart;
+      }
+      alert.querySelectorAll('[data-act]').forEach(bindAct);
+    }
+  } else if (s.total === 0) {
+    alert.style.display = ''; alert.className = 'card full alert warn';
+    alert.innerHTML = '<b>No contacts yet.</b> In Google Sheets choose File → Download → Microsoft Excel (.xlsx), put the file in the engine folder, then press <b>Import / re-import contacts</b>.';
+  } else if (s.lastError && !s.running) {
+    alert.style.display = ''; alert.className = 'card full alert bad'; alert.innerHTML = '<b>Last problem:</b> ' + esc(s.lastError);
+  } else alert.style.display = 'none';
+  if (g.reachable) alert.dataset.key = '';
+  $('linkPanel').style.display = g.reachable && !g.loggedIn ? '' : 'none';
+  if (g.loggedIn) { $('qrImg').style.display = 'none'; $('pairCode').textContent = ''; }
+
+  // control
+  const t = $('toggle');
+  t.textContent = s.running ? 'Pause sending' : 'Start sending';
+  t.className = 'big' + (s.running ? ' pause' : '');
+  t.disabled = !s.running && (s.total === 0 || s.counts.pending === 0);
+  $('waiting').textContent = s.waiting;
+  $('todaybar').style.width = Math.min(100, 100 * s.today / Math.max(1, s.limit)) + '%';
+  $('todaytext').textContent = `Today: ${s.today} of ${s.limit} openers sent` + (s.limit < s.dailyLimit ? ` (warm-up limit for a new number; goes up to ${s.dailyLimit}/day)` : '') + ` · sending ${s.hours[0]}:00–${s.hours[1]}:00 IST` + (s.counts.pending ? ` · about ${s.daysLeft} day(s) left` : '');
+
+  // stats
+  const k = Object.assign({ pending: 0, sent: 0, replied: 0, interested: 0, details_sent: 0, not_interested: 0, not_on_whatsapp: 0, skipped: 0 }, s.counts);
+  const items = [
+    ['Left to send', k.pending], ['Openers sent', k.sent + (k.replied || 0) + (k.interested || 0) + (k.details_sent || 0) + (k.not_interested || 0)],
+    ['Details sent', (k.details_sent || 0) + (k.interested || 0)], ['Needs your reply', s.needsYou.length, true],
+    ['Not interested', k.not_interested || 0], ['Not on WhatsApp', k.not_on_whatsapp || 0], ['Skipped (call notes)', k.skipped || 0],
+  ];
+  $('stats').innerHTML = items.map(([l, v, hl]) => `<div class="stat${hl && v ? ' hl' : ''}"><b>${v}</b><span>${l}</span></div>`).join('');
+
+  // needs you
+  const key = JSON.stringify(s.needsYou.map((n) => [n.phone, n.thread.length]));
+  if (key !== lastNeedsKey) {
+    lastNeedsKey = key;
+    $('needs').innerHTML = s.needsYou.length ? s.needsYou.map((n) => `
+      <div class="reply" data-phone="${esc(n.phone)}">
+        <h3>${esc(n.name || fmtPhone(n.phone))}</h3>
+        <div class="meta">${esc(fmtPhone(n.phone))} · ${esc(n.region)}</div>
+        <div class="thread">${n.thread.map((m) => `<div class="msg ${m.from}">${esc(m.text)}</div>`).join('')}</div>
+        <textarea placeholder="Type a reply… (sends from your outreach number)">${esc(drafts[n.phone] || '')}</textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary" data-r="reply">Send reply</button>
+          <button class="btn" data-r="details">Send details + demo link</button>
+          <button class="btn" data-r="notinterested">Not interested</button>
+          <button class="btn ghost" data-r="done">Done</button>
+        </div>
+      </div>`).join('') : '<div class="empty">No replies waiting. Positive replies get the details and demo link automatically.</div>';
+    document.querySelectorAll('.reply .thread').forEach((th) => th.scrollTop = th.scrollHeight);
+  }
+
+  // feed
+  $('feed').innerHTML = s.activity.map((a) => `<li><time>${fmtTime(a.at)}</time><span class="${a.kind}">${esc(a.text)}</span></li>`).join('') || '<li class="empty">Nothing yet.</li>';
+  $('importInfo').textContent = s.importFile ? `Contacts: ${s.total} from ${s.importFile} (imported ${fmtTime(s.importedAt)}). Re-importing only adds new numbers; statuses are kept.` : '';
+}
+
+async function refresh() {
+  try { const r = await fetch('/api/state'); render(await r.json()); }
+  catch (e) { $('waiting').textContent = 'Engine not reachable. Is the engine window still open?'; }
+}
+
+let qrTimer = null;
+$('qrBtn').onclick = async () => {
+  $('qrBtn').disabled = true; $('qrInfo').textContent = 'Getting a QR code…';
+  try {
+    const d = await act('login');
+    const img = $('qrImg'); img.src = '/api/qr.png?t=' + Date.now(); img.style.display = ''; $('qrPlaceholder').style.display = 'none';
+    let left = d.seconds; clearInterval(qrTimer);
+    qrTimer = setInterval(() => {
+      left--; $('qrInfo').textContent = left > 0 ? `Scan within ${left}s` : 'QR expired. Click again for a new one.';
+      if (left <= 0) { clearInterval(qrTimer); img.style.display = 'none'; $('qrPlaceholder').style.display = ''; $('qrBtn').textContent = 'Show a new QR code'; }
+    }, 1000);
+  } catch (_) { $('qrInfo').textContent = ''; }
+  finally { $('qrBtn').disabled = false; }
+};
+$('pairBtn').onclick = async () => {
+  $('pairBtn').disabled = true;
+  try { const d = await act('paircode', { phone: $('pairPhone').value }); $('pairCode').textContent = d.code || ''; } catch (_) {}
+  finally { $('pairBtn').disabled = false; }
+};
+$('toggle').onclick = async () => { await act(S && S.running ? 'pause' : 'start'); };
+function bindAct(b) {
+  b.onclick = async () => {
+    b.disabled = true;
+    if (b.dataset.act === 'restartgowa') toast('Restarting gowa… this can take up to a minute.', 8000);
+    try {
+      const d = await act(b.dataset.act);
+      if (b.dataset.act === 'import') toast(`Imported ${d.added} new contacts.`);
+      if (b.dataset.act === 'test') toast('Test sent. Check WhatsApp on your own number.');
+      if (b.dataset.act === 'restartgowa') toast(d.state === 'running' || d.state === 'external' ? 'gowa is running.' : 'gowa did not come up. See the message at the top.', 6000);
+    } catch (_) {} finally { b.disabled = false; }
+  };
+}
+document.querySelectorAll('[data-act]').forEach(bindAct);
+$('needs').addEventListener('input', (e) => { const card = e.target.closest('.reply'); if (card) drafts[card.dataset.phone] = e.target.value; });
+$('needs').addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-r]'); if (!b) return;
+  const card = b.closest('.reply'); const phone = card.dataset.phone;
+  const body = { phone };
+  if (b.dataset.r === 'reply') body.text = card.querySelector('textarea').value;
+  b.disabled = true;
+  try { await act(b.dataset.r, body); delete drafts[phone]; lastNeedsKey = ''; if (b.dataset.r === 'details') toast('Details will be sent in a moment.'); }
+  catch (_) {} finally { b.disabled = false; }
+});
+refresh();
+setInterval(refresh, 4000);
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "testNumber": "",
+  "dashboardPort": 4000,
+  "timezone": "Asia/Kolkata",
+  "sendFromHour": 10,
+  "sendUntilHour": 19,
+  "dailyLimit": 50,
+  "warmupDailyLimits": [15, 25, 35],
+  "minGapSeconds": 90,
+  "maxGapSeconds": 240,
+  "detailsDelaySeconds": [20, 60],
+  "typingIndicator": true,
+  "skipIfAlreadyEmailed": false,
+  "contactsFile": "",
+  "openBrowser": true,
+  "gowa": {
+    "url": "http://127.0.0.1:3737",
+    "username": "admin",
+    "password": "",
+    "webhookSecret": "",
+    "autoStart": true,
+    "binaryFolder": "gowa",
+    "whatsappProxy": ""
+  }
+}
