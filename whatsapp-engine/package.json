@@ -1,0 +1,14 @@
+{
+  "name": "almaed-whatsapp-engine",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Paced WhatsApp outreach for AlmaED via gowa, with reply handling and a local dashboard.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

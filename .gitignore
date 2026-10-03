@@ -1,0 +1,12 @@
+# Never commit personal data or secrets
+*.xlsx
+*.csv
+whatsapp-engine/data/
+whatsapp-engine/logs/
+whatsapp-engine/gowa/*
+!whatsapp-engine/gowa/README.md
+
+# Dependencies and OS files
+node_modules/
+.DS_Store
+Thumbs.db

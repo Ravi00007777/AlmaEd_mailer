@@ -1,0 +1,121 @@
+ALMAED WHATSAPP OUTREACH - SETUP GUIDE
+======================================
+
+What this does
+--------------
+It sends your AlmaED opener on WhatsApp to the alumni in your Google Sheet, a few at a
+time, from a spare WhatsApp number. When someone replies positively ("yes", "please
+share", "my son is in class 10"...), it automatically sends the details message with the
+free-demo link. Anything else ("who is this?", "what are the fees?") waits for you on the
+dashboard, where you can reply directly.
+
+Before you start (important)
+----------------------------
+* Use a SPARE WhatsApp number - not the AlmaED number your students and parents use, and
+  not your personal one. Cold messages can get a number banned; if that happens, only the
+  spare number is affected. Give it a profile photo and a name like "Kesav | AlmaED".
+* The laptop must be ON, AWAKE and ONLINE during sending hours (10am-7pm). While it's
+  plugged in, set sleep to "Never".
+* gowa (the free, open-source WhatsApp connector) is already included in the "gowa" folder.
+
+
+ONE-TIME SETUP
+==============
+
+1. Install Node.js
+   Go to https://nodejs.org, download the "LTS" version and install it with the default
+   options.
+
+2. Unzip this folder
+   Put the "AlmaED WhatsApp" folder somewhere easy, e.g. Documents.
+
+3. Add your alumni list
+   In Google Sheets, open the alumni Sheet and choose
+   File -> Download -> Microsoft Excel (.xlsx).
+   Move the downloaded .xlsx file into the "AlmaED WhatsApp" folder (next to config.json).
+
+4. Add your own number for testing
+   Open config.json with Notepad (Windows) or TextEdit (Mac). On the first line, put your
+   PERSONAL number between the quotes, like this:
+       "testNumber": "98765 43210",
+   Save and close.
+
+5. Start the engine
+   Windows: double-click  "Start AlmaED WhatsApp.bat"
+            (If Windows says "Windows protected your PC", click More info -> Run anyway.)
+   Mac:     right-click  "Start AlmaED WhatsApp.command" -> Open -> Open
+            (Only the first time. After that you can just double-click it.)
+   A black window opens - KEEP IT OPEN. The dashboard opens in your browser at
+   http://localhost:4000 . It imports your .xlsx automatically on the first start.
+
+6. Link the spare WhatsApp
+   On the dashboard, click "Show QR code". On the spare phone, open WhatsApp ->
+   Settings (or the three dots) -> Linked devices -> Link a device, and scan the code.
+   The dot at the top right turns green when it's linked.
+
+7. Send yourself a test
+   Click "Send test to my number". Your personal WhatsApp receives the opener and the
+   details message exactly as alumni will see them. Check the wording and the links.
+
+8. Press "Start sending". That's it.
+
+
+DAILY USE
+=========
+* Double-click the start file each morning (or leave it running). It continues exactly
+  where it stopped. Nobody is ever messaged twice.
+* Sending pace: 15 the first day, then 25, then 35, then 50 a day, with a random 1.5-4
+  minute gap between messages, only between 10:00 and 19:00 (India time).
+* Check "Needs your reply" a few times a day. Type your reply there (it sends from the
+  spare number), or reply from the spare phone itself. Buttons:
+    Send details + demo link - sends the details message now
+    Not interested           - closes that person
+    Done                     - hides it (e.g. after you've called them)
+* "Pause sending" stops new openers. Replies to interested people still go out.
+* Closing the black window stops everything. Nothing is lost.
+
+
+CHANGING THINGS
+===============
+* The messages: edit messages.json (Notepad/TextEdit), then restart the engine.
+    {first}   = the person's first name
+    [[a|b|c]] = picks one of the options at random, so no two messages are identical
+    *text*    = bold on WhatsApp
+* Speed and hours: in config.json change dailyLimit, sendFromHour, sendUntilHour,
+  minGapSeconds, maxGapSeconds. Restart after saving.
+* New people added to the Sheet: download the .xlsx again into the folder (replace the
+  old one) and click "Import / re-import contacts". Only new numbers are added.
+* Want the results in your Sheet? Click "Download status (CSV)".
+
+
+STAYING SAFE FROM BANS
+======================
+* Keep dailyLimit at 80 or below on this number. Bans happen when many people block or
+  report a number in a short time.
+* The engine skips everyone whose call notes say "not interested", "wrong number",
+  "blocked", "not an alumnus" or "passed away" (about 970 people).
+* If the dashboard says WhatsApp disconnected, open WhatsApp on the spare phone. If
+  WhatsApp says the number is banned, stop and don't try again on the same number.
+
+
+IF SOMETHING GOES WRONG
+=======================
+* "Node.js is not installed" even after installing: restart the laptop and try again.
+* Red bar "gowa could not start" or "gowa is not running": the red bar says why.
+  Most often Windows Security removed gowa as a false alarm. Open Windows Security ->
+  Virus & threat protection -> Protection history, click the item for
+  windows-amd64.exe -> Actions -> Restore (or Allow on device). If it isn't listed,
+  copy gowa\windows-amd64.exe from the zip back into the gowa folder. Then click
+  "Restart gowa" on the dashboard. (gowa v9.5.0 is open source, MIT licence:
+  github.com/aldinokemal/go-whatsapp-web-multidevice)
+* Yellow bar "Starting gowa...": wait up to a minute on the first start.
+* Mac says gowa "cannot be opened": System Settings -> Privacy & Security -> scroll down
+  -> "Allow Anyway", then start the engine again.
+* "Port 4000 is busy": the engine is already open in another window.
+* The QR code won't load, or it says it couldn't reach WhatsApp's servers: campus
+  Wi-Fi/LAN can block WhatsApp's linking connection. Connect the laptop to a mobile
+  hotspot, then click "Show QR code" again. If that works, keep the laptop on the
+  hotspot while it's sending.
+
+Your progress is saved in data/state.json (back it up now and then).
+gowa's own log is in logs/gowa.log.
