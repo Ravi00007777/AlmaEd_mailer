@@ -1,0 +1,12 @@
+# CLI deploys upload from the repo root; keep secrets and personal data out
+.env*
+!.env.example
+**/.env*
+!**/.env.example
+email/
+**/data/
+**/logs/
+**/*.xlsx
+**/*.csv
+**/node_modules/
+whatsapp-engine/gowa/*
